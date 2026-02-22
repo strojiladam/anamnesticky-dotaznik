@@ -84,6 +84,16 @@
       -webkit-appearance: none;
       appearance: none;
       background-color: var(--bg-base);
+      text-align: left;
+      font-family: var(--font-print);
+    }
+
+    /* Ensure WebKit shadow DOM is also left-aligned */
+    input[type="date"]::-webkit-datetime-edit,
+    input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+    input[type="date"]::-webkit-date-and-time-value {
+      text-align: left;
+      justify-content: flex-start;
     }
 
     /* Add this block for consistent focus styles */
@@ -611,15 +621,10 @@
 
     /* --- Preview Floating Controls --- */
     .preview-controls {
-      display: none;
-      /* Hidden by default */
-    }
-
-    .preview-mode-active .preview-controls {
       display: flex;
       gap: 15px;
       position: fixed;
-      bottom: 20px;
+      bottom: 0px;
       left: 50%;
       transform: translateX(-50%);
       padding: 15px 25px;
@@ -629,6 +634,19 @@
       z-index: 1001;
       border: 1px solid #ddd;
       border-bottom: none;
+
+      /* Animation */
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      transition: opacity 0.3s ease, bottom 0.3s ease, visibility 0.3s ease;
+    }
+
+    .preview-mode-active .preview-controls {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+      bottom: 20px;
     }
 
     /* --- Print Text Replacement (Shadow DIV) --- */
@@ -2597,6 +2615,15 @@
         opacity: 1;
         transform: scale(1);
       }
+    }
+
+    /* Plynulý přechod témat */
+    .theme-transition,
+    .theme-transition *,
+    .theme-transition *:before,
+    .theme-transition *:after {
+      transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, fill 0.5s ease, stroke 0.5s ease, box-shadow 0.5s ease !important;
+      transition-delay: 0s !important;
     }
   </style>
 </head>
@@ -5632,52 +5659,103 @@
       const html = document.documentElement;
       const button = document.getElementById('preview-button');
       const form = document.getElementById('questionnaire');
-      const isPreviewing = html.classList.toggle('preview-mode-active');
-      body.classList.toggle('print-preview', isPreviewing);
 
-      // Select all input fields
-      const inputs = form.querySelectorAll('input, textarea, select');
+      // Ochrana proti vícero proklikům během probíhající animace
+      if (form.classList.contains('mode-transitioning')) return;
 
-      if (isPreviewing) {
-        updateExportDate(); // Set current date
-        generatePrintReplacements(); // Generování stínových divů pro tisk
-        markUnansweredQuestions();
-        window.scrollTo(0, 0); // Scroll to top
+      // 1. Spuštění minimalistické fade a blur animace -> Zmizení dotazníku
+      form.style.transition = 'opacity 0.25s ease, filter 0.25s ease';
+      form.style.opacity = '0';
+      form.style.filter = 'blur(2px)';
+      form.classList.add('mode-transitioning');
 
-        // Make all fields non-editable
-        inputs.forEach(el => {
-          if (el.tagName.toLowerCase() !== 'select' && el.type !== 'radio' && el.type !== 'checkbox') {
-            el.readOnly = true;
+      // Vyčkání na dokončení fade out animace před přepnutím UI layoutu
+      setTimeout(() => {
+        // Zachování viditelné pozice (střed obrazovky)
+        const centerY = window.innerHeight / 2;
+        let centerElement = null;
+        let minDistance = Infinity;
+
+        const blocks = document.querySelectorAll('.qa-block:not(.hidden), fieldset');
+        blocks.forEach(block => {
+          const rect = block.getBoundingClientRect();
+          const elemCenter = rect.top + rect.height / 2;
+          const dist = Math.abs(elemCenter - centerY);
+          if (dist < minDistance) {
+            minDistance = dist;
+            centerElement = block;
           }
         });
+        const offsetTopBefore = centerElement ? centerElement.getBoundingClientRect().top : 0;
 
-        // Reset textarea height for preview so CSS can take over
-        // Recalculate height to fit content exactly, removing auto-expand gaps.
-        document.querySelectorAll('textarea.long-text').forEach(area => {
-          const buffer = area.scrollHeight * 0.15; // buffer as 15% of scrollHeight
-          area.style.height = 'auto'; // Reset height
-          area.style.height = `${area.scrollHeight + buffer}px`; // Set to content height + buffer
-          area.style.overflow = 'hidden'; // Hide scrollbar that might appear
+        const isPreviewing = html.classList.toggle('preview-mode-active');
+        body.classList.toggle('print-preview', isPreviewing);
+
+        // Select all input fields
+        const inputs = form.querySelectorAll('input, textarea, select');
+
+        if (isPreviewing) {
+          updateExportDate(); // Set current date
+          generatePrintReplacements(); // Generování stínových divů pro tisk
+          markUnansweredQuestions();
+          window.scrollTo(0, 0); // Uživatelské přání: při přepnutí do náhledu skočit nahoru
+
+          // Make all fields non-editable
+          inputs.forEach(el => {
+            if (el.tagName.toLowerCase() !== 'select' && el.type !== 'radio' && el.type !== 'checkbox') {
+              el.readOnly = true;
+            }
+          });
+
+          // Reset textarea height for preview so CSS can take over
+          // Recalculate height to fit content exactly, removing auto-expand gaps.
+          document.querySelectorAll('textarea.long-text').forEach(area => {
+            const buffer = area.scrollHeight * 0.15; // buffer as 15% of scrollHeight
+            area.style.height = 'auto'; // Reset height
+            area.style.height = `${area.scrollHeight + buffer}px`; // Set to content height + buffer
+            area.style.overflow = 'hidden'; // Hide scrollbar that might appear
+          });
+
+          updatePreviewLayout();
+          window.addEventListener('resize', updatePreviewLayout);
+
+        } else {
+          removeUnansweredMarks();
+          inputs.forEach(el => {
+            el.readOnly = false;
+          });
+
+          // Re-apply auto-expand to textareas when exiting preview
+          document.querySelectorAll('textarea.long-text').forEach(area => {
+            area.style.overflow = ''; // Restore default overflow
+            autoExpandTextarea(area);
+          });
+
+          window.removeEventListener('resize', updatePreviewLayout);
+          form.style.marginBottom = '';
+        }
+
+        // Vyčkání na propis změn v prohlížeči (layout shift) a následné plynulé ukázání dotazníku
+        requestAnimationFrame(() => {
+          // Okamžité vyrovnání scrollování podle dříve uloženého prostředního prvku (pouze při návratu z náhledu)
+          if (!isPreviewing && centerElement) {
+            const newRectTop = centerElement.getBoundingClientRect().top;
+            const delta = newRectTop - offsetTopBefore;
+            window.scrollBy({ top: delta, behavior: 'instant' });
+          }
+
+          // Konec animace -> Nástup nové podoby formuláře
+          form.style.opacity = '1';
+          form.style.filter = 'blur(0px)';
+
+          setTimeout(() => {
+            // Pročištění inline stylů po dokončení animace
+            form.style.transition = '';
+            form.style.filter = '';
+            form.classList.remove('mode-transitioning');
+          }, 250);
         });
-
-        updatePreviewLayout();
-        window.addEventListener('resize', updatePreviewLayout);
-
-      } else {
-        removeUnansweredMarks();
-        inputs.forEach(el => {
-          el.readOnly = false;
-        });
-
-        // Re-apply auto-expand to textareas when exiting preview
-        document.querySelectorAll('textarea.long-text').forEach(area => {
-          area.style.overflow = ''; // Restore default overflow
-          autoExpandTextarea(area);
-        });
-
-        window.removeEventListener('resize', updatePreviewLayout);
-        form.style.marginBottom = '';
-      }
+      }, 250);
     }
 
     function updatePreviewLayout() {
@@ -6253,6 +6331,9 @@
 
     function toggleTheme(e, forceTheme) {
       if (e) e.preventDefault();
+
+      document.documentElement.classList.add('theme-transition');
+
       const currentTheme = document.documentElement.getAttribute("data-theme");
       const newTheme = forceTheme ? forceTheme : (currentTheme === "dark" ? "light" : "dark");
       document.documentElement.setAttribute("data-theme", newTheme);
@@ -6268,6 +6349,10 @@
         themeText.textContent = "Tmavý režim";
         themeIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon-icon lucide-moon"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>`;
       }
+
+      setTimeout(() => {
+        document.documentElement.classList.remove('theme-transition');
+      }, 500);
     }
   </script>
 
