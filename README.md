@@ -1,7 +1,7 @@
 # Anamnestický dotazník
 Vývoj anamnestického dotazníku pro web [diagnostikaditete.cz](https://diagnostikaditete.cz). Volně dostupné pro použití v praxi.
 
-**Náhled aktuální verze:** https://strojiladam.github.io/anamdotaznik.github.io/
+**Náhled aktuální verze:** https://strojiladam.github.io/anamnesticky-dotaznik/
 
 ---
 
