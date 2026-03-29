@@ -2631,7 +2631,7 @@
 <body>
 
   <nav id="smart-nav">
-    <div class="nav-header" onclick="toggleSmartNav()">
+    <div class="nav-header" id="nav-header">
       <div class="nav-progress-wrapper">
         <div class="nav-label">
           <span>Postup v dotazníku</span>
@@ -2680,7 +2680,7 @@
           </div>
           <div class="header-right">
             <div class="header-right-links" id="header-right-links">
-              <a href="#" class="header-link" id="theme-toggle" onclick="toggleTheme(event)">
+              <a href="#" class="header-link" id="theme-toggle">
                 <span class="icon" id="theme-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -2710,8 +2710,7 @@
                   </svg></span> Zpětná vazba
               </a>
             </div>
-            <button type="button" class="menu-toggle-btn" onclick="toggleHeaderMenu(event)" aria-label="Menu"
-              title="Menu">
+            <button type="button" class="menu-toggle-btn" id="menu-toggle-btn" aria-label="Menu" title="Menu">
               <span class="menu-toggle-dot"></span>
               <span class="menu-toggle-dot"></span>
               <span class="menu-toggle-dot"></span>
@@ -2814,13 +2813,12 @@
         <div
           style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-top: 10px;">
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button type="button" class="btn btn-secondary"
-              onclick="document.getElementById('json-file-input').click()">Načíst ze souboru</button>
-            <button type="button" class="btn btn-secondary" id="load-from-storage-btn" onclick="loadForm()">Načíst
+            <button type="button" class="btn btn-secondary" id="load-json-btn">Načíst ze souboru</button>
+            <button type="button" class="btn btn-secondary" id="load-from-storage-btn">Načíst
               poslední průchod</button>
           </div>
           <div style="text-align: right; margin-left: auto;">
-            <button type="button" class="btn-delete-link" onclick="clearHistory()">Smazat aktuální průchod a
+            <button type="button" class="btn-delete-link" id="clear-history-btn">Smazat aktuální průchod a
               historii</button>
           </div>
         </div>
@@ -2847,7 +2845,7 @@
 
         <div class="qa-block">
           <label><span>Věk:</span></label>
-          <input type="text" name="child_age" id="child_age" readonly tabindex="-1" onfocus="this.blur()"
+          <input type="text" name="child_age" id="child_age" readonly tabindex="-1"
             style="cursor:default; pointer-events: none;" placeholder="Dopočítá se z data narození">
         </div>
       </fieldset>
@@ -3486,7 +3484,7 @@
         <div class="qa-block hidden summary-ignore" id="q_other_carer_detail" data-controlled-by="other_carer_status">
           <div id="additional_carers_container"></div>
           <div class="qa-block summary-ignore" style="text-align: center; margin-top: 15px;">
-            <button type="button" class="btn btn-secondary btn-add-item" onclick="addCarer()">+ Přidat vychovávající
+            <button type="button" class="btn btn-secondary btn-add-item" id="add-carer-btn">+ Přidat vychovávající
               osobu</button>
           </div>
         </div>
@@ -3501,7 +3499,7 @@
         <div class="qa-block hidden summary-ignore" id="q_siblings_detail" data-controlled-by="has_siblings">
           <div id="siblings_container"></div>
           <div class="qa-block summary-ignore" style="text-align: center; margin-top: 15px;">
-            <button type="button" class="btn btn-secondary btn-add-item" onclick="addSibling()">+ Přidat
+            <button type="button" class="btn btn-secondary btn-add-item" id="add-sibling-btn">+ Přidat
               sourozence</button>
           </div>
         </div>
@@ -4419,7 +4417,7 @@
 
       <!-- Summary table -->
       <div class="summary-container" id="summary-container">
-        <div class="summary-header" onclick="toggleSummaryDetails()">
+        <div class="summary-header" id="summary-header">
           <div class="summary-stats">
             <div class="stat-item stat-answered">
               <span class="stat-value" id="count-answered">0</span>
@@ -4473,11 +4471,11 @@
         <div
           style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-top: 20px;">
           <div class="save-buttons">
-            <button type="button" class="btn primary" onclick="saveAsJsonFile()">Uložit do souboru</button>
-            <button type="button" class="btn primary" id="preview-button" onclick="togglePrintPreview()">Náhled tisku /
+            <button type="button" class="btn primary" id="save-json-btn">Uložit do souboru</button>
+            <button type="button" class="btn primary" id="preview-button">Náhled tisku /
               PDF</button>
           </div>
-          <button type="button" class="btn btn-secondary" onclick="saveForm(true)" style="margin-left: auto;">Průběžně
+          <button type="button" class="btn btn-secondary" id="save-form-btn" style="margin-left: auto;">Průběžně
             uložit</button>
         </div>
 
@@ -4496,7 +4494,7 @@
               Některé nezabezpečené formy sdílení, například skrze e-mail, mohou nést rizika. Upřednostněte raději
               předání osobně (USB disk) nebo skrze jiné zabezpečené cesty.</span><br><br>
             <span> Pokud jste vyplnili dotazník na veřejném zařízení, nezapomeňte po uložení
-              <span class="alert-action-link" onclick="clearHistory()">vymazat dotazník a průběžně uložená data</span>.
+              <span class="alert-action-link" id="clear-history-link">vymazat dotazník a průběžně uložená data</span>.
             </span>
           </div>
 
@@ -4516,8 +4514,8 @@
 
   <!-- Floating controls for Print Preview -->
   <aside class="preview-controls" aria-label="Ovládání náhledu">
-    <button type="button" class="btn btn-secondary" onclick="togglePrintPreview()">Zpět</button>
-    <button type="button" class="btn primary" onclick="printWithUnansweredMarks()">Tisk/PDF</button>
+    <button type="button" class="btn btn-secondary" id="preview-back-btn">Zpět</button>
+    <button type="button" class="btn primary" id="print-btn">Tisk/PDF</button>
   </aside>
 
   <script>
@@ -4571,7 +4569,7 @@
         const item = document.createElement('div');
         item.className = 'nav-item';
         item.id = `nav-item-${index}`;
-        item.onclick = () => {
+        item.addEventListener('click', () => {
           // Prioritize the HEADING (legend) so the user sees the section title first
           const target = fieldset.querySelector('legend') || fieldset.querySelector('.qa-block') || fieldset;
 
@@ -4596,7 +4594,7 @@
           if (window.innerWidth <= 850 || (smartNav.classList.contains('is-expanded') && smartNav.offsetHeight > headerOffset)) {
             smartNav.classList.remove('is-expanded');
           }
-        };
+        });
 
         item.innerHTML = `
             <div class="nav-item-row">
@@ -5009,7 +5007,7 @@
       fs.innerHTML = `
     <div class="style-soft-header">
         <legend>Další osoba ${index}</legend>
-        <button type="button" class="btn-remove-3" onclick="removeDynamicItem(this)">✖ Odebrat</button>
+        <button type="button" class="btn-remove-3">✖ Odebrat</button>
     </div>
     <div class="style-soft-body">
     <div class="qa-block">
@@ -5088,6 +5086,10 @@
         autoExpandTextarea(area);
       });
 
+      fs.querySelector('.btn-remove-3').addEventListener('click', function () {
+        removeDynamicItem(this);
+      });
+
       // Pre-fill data if provided
       if (data) {
         const inputs = fs.querySelectorAll('input, textarea, select');
@@ -5120,7 +5122,7 @@
       fs.innerHTML = `
     <div class="style-soft-header">
         <legend>Sourozenec ${index}</legend>
-        <button type="button" class="btn-remove-3" onclick="removeDynamicItem(this)">× Odebrat</button>
+        <button type="button" class="btn-remove-3">× Odebrat</button>
     </div>
     <div class="style-soft-body">
     <div class="qa-block">
@@ -5164,6 +5166,10 @@
       fs.querySelectorAll('textarea.long-text').forEach(area => {
         area.addEventListener('input', () => autoExpandTextarea(area));
         autoExpandTextarea(area);
+      });
+
+      fs.querySelector('.btn-remove-3').addEventListener('click', function () {
+        removeDynamicItem(this);
       });
 
       if (data) {
@@ -6306,9 +6312,9 @@
       dialog.showModal();
 
       return new Promise((resolve) => {
-        confirmBtn.onclick = () => { dialog.close(); resolve(true); };
-        cancelBtn.onclick = () => { dialog.close(); resolve(false); };
-        dialog.onclick = (e) => { if (e.target === dialog) { dialog.close(); resolve(null); } };
+        confirmBtn.addEventListener('click', () => { dialog.close(); resolve(true); });
+        cancelBtn.addEventListener('click', () => { dialog.close(); resolve(false); });
+        dialog.addEventListener('click', (e) => { if (e.target === dialog) { dialog.close(); resolve(null); } });
       });
     }
 
@@ -6381,6 +6387,58 @@
         document.documentElement.classList.remove('theme-transition');
       }, 500);
     }
+    // Programmatic bindings replacing inline HTML handlers
+    document.addEventListener('DOMContentLoaded', () => {
+      const elNavHeader = document.getElementById('nav-header');
+      if (elNavHeader) elNavHeader.addEventListener('click', toggleSmartNav);
+
+      const elThemeToggle = document.getElementById('theme-toggle');
+      if (elThemeToggle) elThemeToggle.addEventListener('click', toggleTheme);
+
+      const elMenuToggleBtn = document.getElementById('menu-toggle-btn');
+      if (elMenuToggleBtn) elMenuToggleBtn.addEventListener('click', toggleHeaderMenu);
+
+      const elLoadJsonBtn = document.getElementById('load-json-btn');
+      if (elLoadJsonBtn) elLoadJsonBtn.addEventListener('click', () => {
+        document.getElementById('json-file-input').click();
+      });
+
+      const elLoadFromStorageBtn = document.getElementById('load-from-storage-btn');
+      if (elLoadFromStorageBtn) elLoadFromStorageBtn.addEventListener('click', loadForm);
+
+      const elClearHistoryBtn = document.getElementById('clear-history-btn');
+      if (elClearHistoryBtn) elClearHistoryBtn.addEventListener('click', clearHistory);
+
+      const elClearHistoryLink = document.getElementById('clear-history-link');
+      if (elClearHistoryLink) elClearHistoryLink.addEventListener('click', clearHistory);
+
+      const elChildAge = document.getElementById('child_age');
+      if (elChildAge) elChildAge.addEventListener('focus', function () { this.blur(); });
+
+      const elAddCarerBtn = document.getElementById('add-carer-btn');
+      if (elAddCarerBtn) elAddCarerBtn.addEventListener('click', () => addCarer());
+
+      const elAddSiblingBtn = document.getElementById('add-sibling-btn');
+      if (elAddSiblingBtn) elAddSiblingBtn.addEventListener('click', () => addSibling());
+
+      const elSummaryHeader = document.getElementById('summary-header');
+      if (elSummaryHeader) elSummaryHeader.addEventListener('click', toggleSummaryDetails);
+
+      const elSaveJsonBtn = document.getElementById('save-json-btn');
+      if (elSaveJsonBtn) elSaveJsonBtn.addEventListener('click', saveAsJsonFile);
+
+      const elPreviewBtn = document.getElementById('preview-button');
+      if (elPreviewBtn) elPreviewBtn.addEventListener('click', togglePrintPreview);
+
+      const elSaveFormBtn = document.getElementById('save-form-btn');
+      if (elSaveFormBtn) elSaveFormBtn.addEventListener('click', () => saveForm(true));
+
+      const elPreviewBackBtn = document.getElementById('preview-back-btn');
+      if (elPreviewBackBtn) elPreviewBackBtn.addEventListener('click', togglePrintPreview);
+
+      const elPrintBtn = document.getElementById('print-btn');
+      if (elPrintBtn) elPrintBtn.addEventListener('click', printWithUnansweredMarks);
+    });
   </script>
 
 
